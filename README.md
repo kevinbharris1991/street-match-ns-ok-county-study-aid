@@ -81,6 +81,9 @@ python3 -m http.server 8080 --directory Builds/WebGL
 For desktop, use **File > Build Settings**, select your platform, and build.
 The game scene is already included. Desktop and landscape tablet layouts are
 recommended; portrait layouts also scale to the available screen and safe area.
+The interface fits a minimum 1440 x 1000 logical layout within the usable screen,
+including cutouts. Smaller windows scale the whole interface rather than clipping
+actions. The splash artwork keeps its original aspect ratio.
 
 An automated WebGL build can use:
 
@@ -133,6 +136,8 @@ Before distributing a build, check these Unity play-mode behaviors:
 - Try a wrong match, a hint, tap-to-match, sound toggle, and scene reload.
 - Complete every level, inspect unlocks, then finish all five full-mix boards.
 - Resize the window and test touch on your target device.
+- Check Hint, Study again, and Continue after eight-pair rounds and long player names.
+- Run the EditMode layout tests for flexible controls and eight-pair study screens.
 - Reload a hosted WebGL build to confirm browser save persistence.
 
 The rules suite can run without Unity, but it does not replace Unity compilation,

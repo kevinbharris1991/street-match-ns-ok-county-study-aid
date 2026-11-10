@@ -74,6 +74,7 @@ namespace StreetMatch
             var size = rect.GetComponent<LayoutElement>();
             if (size == null) size = rect.gameObject.AddComponent<LayoutElement>();
             size.preferredHeight = height;
+            size.minHeight = Mathf.Max(0, height);
             size.flexibleHeight = flex;
             size.preferredWidth = width;
             return size;
@@ -81,7 +82,11 @@ namespace StreetMatch
 
         internal static void FlexWidth(RectTransform rect, float weight = 1)
         {
-            Size(rect).flexibleWidth = weight;
+            var size = rect.GetComponent<LayoutElement>();
+            if (size == null) size = rect.gameObject.AddComponent<LayoutElement>();
+            size.minWidth = 0;
+            size.preferredWidth = 0;
+            size.flexibleWidth = weight;
         }
 
         internal static Text Label(string text, Transform parent, int fontSize = 22,

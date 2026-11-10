@@ -92,7 +92,7 @@ namespace StreetMatch
             var scaler = canvasObject.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1440, 1000);
-            scaler.matchWidthOrHeight = .5f;
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
             GameUI.Surface(canvasRect, GameUI.Ink, false);
 
             if (FindObjectOfType<EventSystem>() == null)
@@ -139,7 +139,7 @@ namespace StreetMatch
             content = GameUI.Rect("Page", root);
             GameUI.Size(content, flex: 1);
             RectTransform footer = GameUI.Column("Feedback", root, 0, 0);
-            GameUI.Size(footer, 60);
+            GameUI.Size(footer, 64);
             feedback = GameUI.Label("", footer, 21, GameUI.Mint, TextAnchor.MiddleCenter);
             GameUI.Size(feedback.rectTransform, 34);
             storageStatus = GameUI.Label("", footer, 14, GameUI.Muted, TextAnchor.MiddleCenter);
@@ -180,8 +180,14 @@ namespace StreetMatch
 
             splashScreen = GameUI.Rect("Splash Screen", canvasRect);
             GameUI.Stretch(splashScreen);
-            RawImage background = splashScreen.gameObject.AddComponent<RawImage>();
+            GameUI.Surface(splashScreen, GameUI.Ink, false);
+            RectTransform artwork = GameUI.Rect("Splash Artwork", splashScreen);
+            RawImage background = artwork.gameObject.AddComponent<RawImage>();
             background.texture = splashTexture;
+            background.raycastTarget = false;
+            var aspect = artwork.gameObject.AddComponent<AspectRatioFitter>();
+            aspect.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            aspect.aspectRatio = (float)splashTexture.width / splashTexture.height;
 
             RectTransform startButtonRect = GameUI.Rect("Start Game", splashScreen);
             GameUI.Stretch(startButtonRect);
@@ -218,7 +224,7 @@ namespace StreetMatch
             RectTransform panel = GameUI.Column("Menu Panel", gameMenu, 24, 14);
             panel.anchorMin = panel.anchorMax = new Vector2(.5f, .5f);
             panel.pivot = new Vector2(.5f, .5f);
-            panel.sizeDelta = new Vector2(460, 380);
+            panel.sizeDelta = new Vector2(460, 420);
             GameUI.Surface(panel, GameUI.Panel);
 
             Text title = GameUI.Label("Game Menu", panel, 32, GameUI.White, TextAnchor.MiddleCenter);
@@ -397,7 +403,7 @@ namespace StreetMatch
             round = new MatchRound(roundIds, progress);
             RectTransform page = Page();
             RectTransform top = GameUI.Row("Round Heading", page);
-            GameUI.Size(top, 42);
+            GameUI.Size(top, 48);
             roundStatus = GameUI.Label("", top, 24);
             GameUI.FlexWidth(roundStatus.rectTransform, 3);
             Button hint = GameUI.Button("Hint (H)", top, Hint);
@@ -627,6 +633,13 @@ namespace StreetMatch
                 rect.anchorMax = new Vector2((float)round.Points / round.Count, 1);
                 rect.offsetMin = Vector2.zero;
                 rect.offsetMax = Vector2.zero;
+                var scaler = GetComponentInParent<CanvasScaler>();
+                if (scaler != null && safe.width > 0 && safe.height > 0)
+                {
+                    // Reserve the reference layout inside the usable screen, not behind cutouts.
+                    scaler.referenceResolution = new Vector2(
+                        1440f * size.x / safe.width, 1000f * size.y / safe.height);
+                }
             }
             UpdateHeader();
         }

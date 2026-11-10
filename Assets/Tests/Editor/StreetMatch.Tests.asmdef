@@ -1,6 +1,6 @@
 {
   "name": "StreetMatch.Tests",
-  "references": ["StreetMatch.Core"],
+  "references": ["StreetMatch.Core", "StreetMatch.Runtime", "UnityEngine.UI"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"]
 }
