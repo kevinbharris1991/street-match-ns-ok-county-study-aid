@@ -6,7 +6,7 @@ keep the focus on remembering rather than racing. No paid assets or external ser
 
 ## Open and play
 
-1. Install **Unity 2022.3 LTS** through Unity Hub. The project targets **2022.3.62f1**.
+1. Install **Unity 2022.3.62f3 LTS** through Unity Hub. The project targets this exact editor version.
    Include WebGL Build Support if you want a browser version.
 2. In Unity Hub, choose **Add project from disk** and select this folder.
 3. Let Unity import the project and resolve its packages.
