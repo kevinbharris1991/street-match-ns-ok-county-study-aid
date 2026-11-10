@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace SherrysGame
+namespace StreetMatch
 {
     public sealed class MatchCard : MonoBehaviour, IBeginDragHandler, IDragHandler,
         IEndDragHandler, IDropHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
@@ -11,7 +11,7 @@ namespace SherrysGame
         public int PairId { get; private set; }
         public bool IsKey { get; private set; }
         public bool Matched { get; private set; }
-        private SherrysGameController game;
+        private StreetMatchController game;
         private RectTransform rect;
         private CanvasGroup group;
         private Outline outline;
@@ -24,7 +24,7 @@ namespace SherrysGame
         private Vector2 restingPosition;
         private string caption;
 
-        public void Initialize(SherrysGameController owner, int id, bool isKey)
+        public void Initialize(StreetMatchController owner, int id, bool isKey)
         {
             game = owner;
             PairId = id;

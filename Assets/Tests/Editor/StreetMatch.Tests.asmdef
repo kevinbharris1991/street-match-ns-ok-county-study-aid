@@ -1,6 +1,6 @@
 {
-  "name": "SherrysGame.Tests",
-  "references": ["SherrysGame.Core"],
+  "name": "StreetMatch.Tests",
+  "references": ["StreetMatch.Core"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"]
 }

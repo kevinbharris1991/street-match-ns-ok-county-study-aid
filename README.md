@@ -83,7 +83,7 @@ An automated WebGL build can use:
 
 ```sh
 Unity -batchmode -quit -projectPath "$PWD" \
-  -executeMethod SherrysGame.Editor.GameProjectSetup.BuildWebGL \
+  -executeMethod StreetMatch.Editor.GameProjectSetup.BuildWebGL \
   -logFile build.log
 ```
 
@@ -101,6 +101,11 @@ pair IDs stable to preserve the meaning of existing saved progress.
 - `Assets/Editor`: project setup and WebGL build command.
 - `Assets/Tests/Editor`: shared rules regression suite and Unity test entry point.
 - `Tests`: dependency-free .NET runner for the same core regression suite.
+
+The scene, controller, and code assemblies use `StreetMatch` naming. Legacy
+PlayerPrefs keys and the Unity company identifier remain unchanged only for
+compatibility with existing local saves, sound preferences, and player names.
+Rebuild and redistribute the game to apply source changes to an existing installation.
 
 ## Checks
 

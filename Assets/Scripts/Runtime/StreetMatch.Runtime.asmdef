@@ -1,0 +1,5 @@
+{
+  "name": "StreetMatch.Runtime",
+  "rootNamespace": "StreetMatch",
+  "references": ["StreetMatch.Core", "UnityEngine.UI"]
+}

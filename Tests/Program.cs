@@ -1,5 +1,5 @@
 using System;
-using SherrysGame.Tests;
+using StreetMatch.Tests;
 
 internal static class Program
 {

@@ -4,7 +4,7 @@ using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace SherrysGame.Editor
+namespace StreetMatch.Editor
 {
     [InitializeOnLoad]
     internal static class GameProjectSetup
@@ -16,6 +16,7 @@ namespace SherrysGame.Editor
 
         private static void Configure()
         {
+            // Keep the storage identity stable so existing desktop PlayerPrefs remain accessible.
             PlayerSettings.companyName = "SherrysGame";
             PlayerSettings.productName = "Street Match (N & S): OK County — Study Aid";
             PlayerSettings.defaultScreenWidth = 1440;
@@ -37,7 +38,7 @@ namespace SherrysGame.Editor
         private static void OpenScene()
         {
             if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-                EditorSceneManager.OpenScene("Assets/Scenes/SherrysGame.unity");
+                EditorSceneManager.OpenScene("Assets/Scenes/StreetMatch.unity");
         }
 
         [MenuItem("Street Match (N & S): OK County — Study Aid/Build WebGL")]
@@ -47,7 +48,7 @@ namespace SherrysGame.Editor
             Directory.CreateDirectory("Builds/WebGL");
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
-                scenes = new[] { "Assets/Scenes/SherrysGame.unity" },
+                scenes = new[] { "Assets/Scenes/StreetMatch.unity" },
                 locationPathName = "Builds/WebGL",
                 target = BuildTarget.WebGL,
                 options = BuildOptions.None

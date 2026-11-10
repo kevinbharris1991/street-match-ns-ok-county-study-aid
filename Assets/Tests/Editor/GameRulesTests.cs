@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace SherrysGame.Tests
+namespace StreetMatch.Tests
 {
     public sealed class GameRulesTests
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SherrysGame.Tests
+namespace StreetMatch.Tests
 {
     public static class GameRulesSuite
     {

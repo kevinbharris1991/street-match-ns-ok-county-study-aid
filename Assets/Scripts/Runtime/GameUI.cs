@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace SherrysGame
+namespace StreetMatch
 {
     internal static class GameUI
     {

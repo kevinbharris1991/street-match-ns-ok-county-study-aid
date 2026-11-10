@@ -1,10 +1,11 @@
 using System;
 using UnityEngine;
 
-namespace SherrysGame
+namespace StreetMatch
 {
     internal static class GameSave
     {
+        // Legacy keys are storage identifiers, not display names; retain existing player data.
         private const string SaveKey = "SherrysGame.Learning.v1";
 
         internal static LearningProgress Load(out string warning)

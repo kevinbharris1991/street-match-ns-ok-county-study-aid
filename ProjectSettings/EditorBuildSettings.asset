@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SherrysGame.unity
+    path: Assets/Scenes/StreetMatch.unity
     guid: 3c57c93536cc4e9bb84f26d801173aed
   m_configObjects: {}

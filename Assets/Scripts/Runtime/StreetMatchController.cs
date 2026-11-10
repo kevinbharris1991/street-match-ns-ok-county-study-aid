@@ -6,9 +6,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = System.Random;
 
-namespace SherrysGame
+namespace StreetMatch
 {
-    public sealed class SherrysGameController : MonoBehaviour
+    public sealed class StreetMatchController : MonoBehaviour
     {
         private enum Mode { Level, Review, Mix }
         private readonly Random random = new Random();
@@ -48,9 +48,9 @@ namespace SherrysGame
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "SherrysGame" ||
-                FindObjectOfType<SherrysGameController>() != null) return;
-            new GameObject("Street Match (N & S): OK County — Study Aid").AddComponent<SherrysGameController>();
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "StreetMatch" ||
+                FindObjectOfType<StreetMatchController>() != null) return;
+            new GameObject("Street Match (N & S): OK County — Study Aid").AddComponent<StreetMatchController>();
         }
 
         private void Awake()

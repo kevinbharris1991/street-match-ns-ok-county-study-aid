@@ -1,0 +1,5 @@
+{
+  "name": "StreetMatch.Core",
+  "rootNamespace": "StreetMatch",
+  "noEngineReferences": true
+}

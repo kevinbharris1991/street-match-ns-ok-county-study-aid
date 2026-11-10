@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SherrysGame
+namespace StreetMatch
 {
     [Serializable]
     public sealed class Pair
