@@ -1,0 +1,5 @@
+{
+  "name": "SherrysGame.Core",
+  "rootNamespace": "SherrysGame",
+  "noEngineReferences": true
+}

@@ -1,0 +1,5 @@
+{
+  "name": "SherrysGame.Runtime",
+  "rootNamespace": "SherrysGame",
+  "references": ["SherrysGame.Core", "UnityEngine.UI"]
+}

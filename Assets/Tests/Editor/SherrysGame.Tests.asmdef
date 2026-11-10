@@ -1,0 +1,6 @@
+{
+  "name": "SherrysGame.Tests",
+  "references": ["SherrysGame.Core"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}
