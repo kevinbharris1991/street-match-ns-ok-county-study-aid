@@ -17,7 +17,7 @@ namespace SherrysGame.Editor
         private static void Configure()
         {
             PlayerSettings.companyName = "SherrysGame";
-            PlayerSettings.productName = "Sherry's Game for Work";
+            PlayerSettings.productName = "Street Match (N & S): OK County — Study Aid";
             PlayerSettings.defaultScreenWidth = 1440;
             PlayerSettings.defaultScreenHeight = 1000;
             PlayerSettings.resizableWindow = true;
@@ -33,14 +33,14 @@ namespace SherrysGame.Editor
             }
         }
 
-        [MenuItem("Sherry's Game/Open Game Scene")]
+        [MenuItem("Street Match (N & S): OK County — Study Aid/Open Game Scene")]
         private static void OpenScene()
         {
             if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                 EditorSceneManager.OpenScene("Assets/Scenes/SherrysGame.unity");
         }
 
-        [MenuItem("Sherry's Game/Build WebGL")]
+        [MenuItem("Street Match (N & S): OK County — Study Aid/Build WebGL")]
         public static void BuildWebGL()
         {
             Configure();
@@ -54,7 +54,7 @@ namespace SherrysGame.Editor
             });
             if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
                 throw new BuildFailedException("WebGL build failed: " + report.summary.result);
-            Debug.Log("Sherry's Game for Work built to Builds/WebGL.");
+            Debug.Log("Street Match (N & S): OK County — Study Aid built to Builds/WebGL.");
         }
     }
 }

@@ -24,9 +24,12 @@ namespace SherrysGame
         private RectTransform canvasRect;
         private RectTransform content;
         private RectTransform ghost;
+        private RectTransform gameMenu;
+        private InputField nameInput;
         private Text stats;
         private Text feedback;
         private Text storageStatus;
+        private Text menuStatus;
         private Text roundStatus;
         private Image progressFill;
         private MatchCard selected;
@@ -38,6 +41,7 @@ namespace SherrysGame
         private AudioClip correctSound;
         private AudioClip wrongSound;
         private bool muted;
+        private string playerName;
         private string storageWarning;
         private string loadWarning;
 
@@ -46,7 +50,7 @@ namespace SherrysGame
         {
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "SherrysGame" ||
                 FindObjectOfType<SherrysGameController>() != null) return;
-            new GameObject("Sherry's Game for Work").AddComponent<SherrysGameController>();
+            new GameObject("Street Match (N & S): OK County — Study Aid").AddComponent<SherrysGameController>();
         }
 
         private void Awake()
@@ -54,6 +58,7 @@ namespace SherrysGame
             progress = GameSave.Load(out loadWarning);
             level = progress.UnlockedLevel;
             muted = PlayerPrefs.GetInt("SherrysGame.Muted", 0) == 1;
+            playerName = PlayerPrefs.GetString("SherrysGame.PlayerName", "");
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
             if (FindObjectOfType<AudioListener>() == null) gameObject.AddComponent<AudioListener>();
@@ -100,13 +105,15 @@ namespace SherrysGame
             GameUI.FlexWidth(heading, 2);
             Text eyebrow = GameUI.Label("A LITTLE PRACTICE. A LOT MORE CONFIDENCE.", heading, 14, GameUI.Mint);
             GameUI.Size(eyebrow.rectTransform, 22);
-            Text title = GameUI.Label("Sherry's Game for Work", heading, 36);
+            Text title = GameUI.Label("Street Match (N & S): OK County — Study Aid", heading, 36);
             title.fontStyle = FontStyle.Bold;
             GameUI.Size(title.rectTransform, 42);
             stats = GameUI.Label("", header, 18, GameUI.Muted, TextAnchor.MiddleRight);
             GameUI.FlexWidth(stats.rectTransform);
             soundButton = GameUI.Button(muted ? "Sound off" : "Sound on", header, ToggleSound);
             GameUI.Size((RectTransform)soundButton.transform, width: 100);
+            Button menuButton = GameUI.Button("Menu", header, ShowGameMenu);
+            GameUI.Size((RectTransform)menuButton.transform, width: 100);
 
             RectTransform navigation = GameUI.Row("Levels", root, 8);
             GameUI.Size(navigation, 48);
@@ -140,11 +147,104 @@ namespace SherrysGame
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Escape)) ClearSelection();
+            if (gameMenu != null)
+            {
+                if (Input.GetKeyDown(KeyCode.Escape)) CloseGameMenu();
+                return;
+            }
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                ClearSelection();
+            }
             if (Input.GetKeyDown(KeyCode.H) && round != null && !round.Complete) Hint();
             if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) &&
+                (nameInput == null || !nameInput.isFocused) &&
                 primary != null && primary.isActiveAndEnabled && primary.interactable)
                 primary.onClick.Invoke();
+        }
+
+        private void ShowGameMenu()
+        {
+            if (gameMenu != null) return;
+
+            gameMenu = GameUI.Rect("Game Menu", canvasRect);
+            GameUI.Stretch(gameMenu);
+            GameUI.Surface(gameMenu, new Color32(10, 14, 27, 235), false);
+
+            RectTransform panel = GameUI.Column("Menu Panel", gameMenu, 24, 14);
+            panel.anchorMin = panel.anchorMax = new Vector2(.5f, .5f);
+            panel.pivot = new Vector2(.5f, .5f);
+            panel.sizeDelta = new Vector2(460, 380);
+            GameUI.Surface(panel, GameUI.Panel);
+
+            Text title = GameUI.Label("Game Menu", panel, 32, GameUI.White, TextAnchor.MiddleCenter);
+            title.fontStyle = FontStyle.Bold;
+            GameUI.Size(title.rectTransform, 46);
+            Text nameLabel = GameUI.Label("Your name", panel, 18, GameUI.White);
+            GameUI.Size(nameLabel.rectTransform, 28);
+            RectTransform inputRect = GameUI.Rect("Name Input", panel);
+            GameUI.Surface(inputRect, GameUI.Card);
+            nameInput = inputRect.gameObject.AddComponent<InputField>();
+            nameInput.targetGraphic = inputRect.GetComponent<Image>();
+            nameInput.characterLimit = 32;
+            nameInput.lineType = InputField.LineType.SingleLine;
+            nameInput.textComponent = GameUI.Label("", inputRect, 20, GameUI.White);
+            GameUI.Stretch(nameInput.textComponent.rectTransform, 12);
+            Text placeholder = GameUI.Label("Type your name", inputRect, 20, GameUI.Muted);
+            GameUI.Stretch(placeholder.rectTransform, 12);
+            nameInput.placeholder = placeholder;
+            nameInput.text = playerName;
+            nameInput.onEndEdit.AddListener(OnPlayerNameEdited);
+            GameUI.Size(inputRect, 48);
+            menuStatus = GameUI.Label("Your name and progress are saved on this device.", panel, 17,
+                GameUI.Muted, TextAnchor.MiddleCenter);
+            GameUI.Size(menuStatus.rectTransform, 42);
+            GameUI.Button("Return to game", panel, CloseGameMenu, GameUI.Mint, GameUI.Ink);
+            GameUI.Button("Exit game", panel, ExitGame, GameUI.Card, GameUI.White);
+        }
+
+        private void CloseGameMenu()
+        {
+            if (gameMenu == null) return;
+            SavePlayerName();
+            Destroy(gameMenu.gameObject);
+            gameMenu = null;
+            nameInput = null;
+            menuStatus = null;
+        }
+
+        private void OnPlayerNameEdited(string value)
+        {
+            playerName = value.Trim();
+            if (nameInput != null && nameInput.text != playerName)
+                nameInput.SetTextWithoutNotify(playerName);
+            SavePlayerName();
+        }
+
+        private void SavePlayerName()
+        {
+            if (nameInput != null) playerName = nameInput.text.Trim();
+            try
+            {
+                PlayerPrefs.SetString("SherrysGame.PlayerName", playerName);
+                PlayerPrefs.Save();
+            }
+            catch (PlayerPrefsException exception)
+            {
+                storageWarning = "Name could not be saved on this device.";
+                Debug.LogWarning(storageWarning + " " + exception.Message);
+                UpdateHeader();
+            }
+        }
+
+        private void ExitGame()
+        {
+            SavePlayerName();
+#if UNITY_WEBGL && !UNITY_EDITOR
+            menuStatus.text = "To exit the game, close this browser tab.";
+#else
+            Application.Quit();
+#endif
         }
 
         private void ShowLevel(int target)
@@ -400,7 +500,8 @@ namespace SherrysGame
             GameUI.Size(GameUI.Rect("Top Space", page), flex: 1);
             Text kicker = GameUI.Label("ROUND COMPLETE", page, 19, GameUI.Mint, TextAnchor.MiddleCenter);
             GameUI.Size(kicker.rectTransform, 32);
-            Text heading = GameUI.Label("Nicely done, Sherry!", page, 46, GameUI.White, TextAnchor.MiddleCenter);
+            string greeting = string.IsNullOrEmpty(playerName) ? "Nicely done!" : "Nicely done, " + playerName + "!";
+            Text heading = GameUI.Label(greeting, page, 46, GameUI.White, TextAnchor.MiddleCenter);
             heading.fontStyle = FontStyle.Bold;
             GameUI.Size(heading.rectTransform, 72);
             Text score = GameUI.Label("+" + points + " points", page, 56, GameUI.Mint, TextAnchor.MiddleCenter);
@@ -564,12 +665,20 @@ namespace SherrysGame
 
         private void OnApplicationPause(bool paused)
         {
-            if (paused && progress != null) Save();
+            if (paused && progress != null)
+            {
+                Save();
+                SavePlayerName();
+            }
         }
 
         private void OnApplicationQuit()
         {
-            if (progress != null) GameSave.Save(progress, out storageWarning);
+            if (progress != null)
+            {
+                GameSave.Save(progress, out storageWarning);
+                SavePlayerName();
+            }
         }
 
         private void OnDestroy()

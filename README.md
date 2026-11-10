@@ -1,4 +1,4 @@
-# Sherry's Game for Work
+# Street Match (N & S): OK County — Study Aid
 
 A calm, stylish 2D Unity matching game for learning 40 work-related names and numbers.
 Navy panels, mint accents, lavender number cards, soft sounds, and a no-timer approach
@@ -10,7 +10,7 @@ keep the focus on remembering rather than racing. No paid assets or external ser
    Include WebGL Build Support if you want a browser version.
 2. In Unity Hub, choose **Add project from disk** and select this folder.
 3. Let Unity import the project and resolve its packages.
-4. Choose **Sherry's Game > Open Game Scene**, then press **Play**.
+4. Choose **Street Match (N & S): OK County — Study Aid > Open Game Scene**, then press **Play**.
 
 The scene is intentionally lightweight: its UI, cards, camera, textures, and sounds
 are constructed at runtime. Start this scene rather than a new, unnamed scene.
@@ -30,6 +30,10 @@ Use **Active Input Handling: Input Manager (Old)** if you change the input setti
   selection; **Enter** activates the study/continue button.
 - **Study again** returns to the preview. It starts a fresh round, while retaining
   points and learning progress already earned.
+- Open **Menu** to return to the game or exit. In a browser build, choose **Exit game**
+  and then close the browser tab; browsers do not let the game close its own tab.
+- Set your name in **Menu** to personalize the round-complete message. Your name is
+  saved locally on the device.
 
 ## Learning and levels
 
@@ -63,7 +67,7 @@ data can remove saves. Save failures display a warning in the footer.
 
 ## Build
 
-For a browser build, choose **Sherry's Game > Build WebGL**. Output goes to
+For a browser build, choose **Street Match (N & S): OK County — Study Aid > Build WebGL**. Output goes to
 `Builds/WebGL`. Serve that directory using an HTTP server rather than opening
 `index.html` directly, for example:
 
