@@ -22,6 +22,9 @@ tap/click it to start.
 
 ## How to play
 
+- On the main menu, enter your name and choose **Study**. Blank or whitespace-only
+  names cannot start a study session. Your name is remembered locally; progress
+  remains shared on the device, not separated into player profiles.
 - Study the pairs, then press **Ready? Start matching**.
 - Drag a name onto its number **or** drag a number onto its name.
   Mouse and touch are supported. Alternatively, tap/click one card in each column.
@@ -29,14 +32,20 @@ tap/click it to start.
   available, with friendly feedback and no point penalty.
 - Some supplied numbers appear more than once. Any visible card with the right
   number is valid; matching never depends on a hidden card identity.
-- **Hint** (`H`) highlights a name and its correct number. **Escape** clears a
-  selection; **Enter** activates the study/continue button.
+- **Hint** (`H`) highlights a name and its correct number. **Escape** opens the
+  in-game menu; **Enter** activates the study/continue button.
 - **Study again** returns to the preview. It starts a fresh round, while retaining
   points and learning progress already earned.
-- Open **Menu** to return to the game or exit. In a browser build, choose **Exit game**
-  and then close the browser tab; browsers do not let the game close its own tab.
-- Set your name in **Menu** to personalize the round-complete message. Your name is
-  saved locally on the device.
+- The main menu has **Study**, **Options**, and **Exit**. The in-game **Menu** button
+  or **Escape** opens **Resume**, **Options**, and **Exit**; it has no name field.
+  Escape closes the in-game menu. Its **Exit** returns to the main menu, keeping
+  earned progress but ending the current round. **Study** starts a fresh preview.
+  **Exit** on the main menu quits desktop builds; in browser builds it explains
+  how to close the tab.
+- Both **Options** buttons open the same **Graphics & Sound** screen, providing
+  graphics quality, fullscreen (desktop), sound on/off, and
+  volume. Settings are saved locally. Browser fullscreen uses the browser's own
+  controls. Back or Escape returns to the menu that opened Options.
 
 ## Learning and levels
 

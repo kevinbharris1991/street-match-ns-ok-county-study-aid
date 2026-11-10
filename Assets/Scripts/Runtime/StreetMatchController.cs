@@ -22,6 +22,11 @@ namespace StreetMatch
         private int level = 1;
         private Mode mode;
         private RectTransform canvasRect;
+        private RectTransform gameRoot;
+        private bool studying;
+        private bool showingOptions;
+        private Button studyButton;
+        private float volume;
         private RectTransform content;
         private RectTransform ghost;
         private RectTransform gameMenu;
@@ -60,6 +65,12 @@ namespace StreetMatch
             level = progress.UnlockedLevel;
             muted = PlayerPrefs.GetInt("SherrysGame.Muted", 0) == 1;
             playerName = PlayerPrefs.GetString("SherrysGame.PlayerName", "");
+            volume = Mathf.Clamp01(PlayerPrefs.GetFloat("StreetMatch.Volume", 1));
+            int quality = PlayerPrefs.GetInt("StreetMatch.Quality", QualitySettings.GetQualityLevel());
+            QualitySettings.SetQualityLevel(Mathf.Clamp(quality, 0, QualitySettings.names.Length - 1));
+#if !UNITY_WEBGL
+            Screen.fullScreen = PlayerPrefs.GetInt("StreetMatch.Fullscreen", Screen.fullScreen ? 1 : 0) == 1;
+#endif
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
             if (FindObjectOfType<AudioListener>() == null) gameObject.AddComponent<AudioListener>();
@@ -67,6 +78,7 @@ namespace StreetMatch
             wrongSound = Tone(190, 220);
             BuildShell();
             ShowLevel(level);
+            ShowMainMenu();
             ShowSplashScreen();
         }
 
@@ -99,6 +111,7 @@ namespace StreetMatch
                 new GameObject("Event System", typeof(EventSystem), typeof(StandaloneInputModule));
 
             RectTransform root = GameUI.Column("Safe Area", canvasRect, 24, 12);
+            gameRoot = root;
             GameUI.Stretch(root);
             root.gameObject.AddComponent<ScreenSafeArea>();
             RectTransform header = GameUI.Row("Header", root, 16);
@@ -158,12 +171,17 @@ namespace StreetMatch
             }
             if (gameMenu != null)
             {
-                if (Input.GetKeyDown(KeyCode.Escape)) CloseGameMenu();
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    if (showingOptions) ReturnFromOptions();
+                    else if (studying) CloseGameMenu();
+                }
                 return;
             }
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                ClearSelection();
+                ShowGameMenu();
+                return;
             }
             if (Input.GetKeyDown(KeyCode.H) && round != null && !round.Complete) Hint();
             if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) &&
@@ -216,7 +234,25 @@ namespace StreetMatch
         private void ShowGameMenu()
         {
             if (gameMenu != null) return;
+            RectTransform panel = CreateMenuPanel("Game Menu", 350);
+            menuStatus.text = "Press Escape to return to studying.";
+            GameUI.Button("Resume", panel, CloseGameMenu, GameUI.Mint, GameUI.Ink);
+            GameUI.Button("Options", panel, ShowOptions);
+            GameUI.Button("Exit", panel, ExitStudySession);
+        }
 
+        private void ExitStudySession()
+        {
+            Save();
+            ClearPage();
+            round = null;
+            ShowMainMenu();
+        }
+
+        private RectTransform CreateMenuPanel(string heading, float height)
+        {
+            CloseGameMenu();
+            if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
             gameMenu = GameUI.Rect("Game Menu", canvasRect);
             GameUI.Stretch(gameMenu);
             GameUI.Surface(gameMenu, new Color32(10, 14, 27, 235), false);
@@ -224,12 +260,25 @@ namespace StreetMatch
             RectTransform panel = GameUI.Column("Menu Panel", gameMenu, 24, 14);
             panel.anchorMin = panel.anchorMax = new Vector2(.5f, .5f);
             panel.pivot = new Vector2(.5f, .5f);
-            panel.sizeDelta = new Vector2(460, 420);
+            panel.sizeDelta = new Vector2(600, height);
             GameUI.Surface(panel, GameUI.Panel);
 
-            Text title = GameUI.Label("Game Menu", panel, 32, GameUI.White, TextAnchor.MiddleCenter);
+            Text title = GameUI.Label(heading, panel, 32, GameUI.White, TextAnchor.MiddleCenter);
             title.fontStyle = FontStyle.Bold;
             GameUI.Size(title.rectTransform, 46);
+            menuStatus = GameUI.Label("", panel, 17, GameUI.Muted, TextAnchor.MiddleCenter);
+            GameUI.Size(menuStatus.rectTransform, 42);
+            return panel;
+        }
+
+        private void ShowMainMenu()
+        {
+            studying = false;
+            gameRoot.gameObject.SetActive(false);
+            RectTransform panel = CreateMenuPanel("Street Match (N & S): OK County", 470);
+            showingOptions = false;
+            menuStatus.text = string.IsNullOrEmpty(storageWarning)
+                ? "Enter your name to begin. Progress is shared on this device." : storageWarning;
             Text nameLabel = GameUI.Label("Your name", panel, 18, GameUI.White);
             GameUI.Size(nameLabel.rectTransform, 28);
             RectTransform inputRect = GameUI.Rect("Name Input", panel);
@@ -246,19 +295,115 @@ namespace StreetMatch
             nameInput.text = playerName;
             nameInput.onEndEdit.AddListener(OnPlayerNameEdited);
             GameUI.Size(inputRect, 48);
-            menuStatus = GameUI.Label("Your name and progress are saved on this device.", panel, 17,
-                GameUI.Muted, TextAnchor.MiddleCenter);
-            GameUI.Size(menuStatus.rectTransform, 42);
-            GameUI.Button("Return to game", panel, CloseGameMenu, GameUI.Mint, GameUI.Ink);
-            GameUI.Button("Exit game", panel, ExitGame, GameUI.Card, GameUI.White);
+            studyButton = GameUI.Button("Study", panel, StartStudying, GameUI.Mint, GameUI.Ink);
+            studyButton.interactable = !string.IsNullOrWhiteSpace(nameInput.text);
+            nameInput.onValueChanged.AddListener(value =>
+                studyButton.interactable = !string.IsNullOrWhiteSpace(value));
+            GameUI.Button("Options", panel, ShowOptions);
+            GameUI.Button("Exit", panel, ExitGame);
+        }
+
+        private void StartStudying()
+        {
+            if (string.IsNullOrWhiteSpace(nameInput.text))
+            {
+                menuStatus.text = "Please enter your name before studying.";
+                return;
+            }
+            CloseGameMenu();
+            studying = true;
+            gameRoot.gameObject.SetActive(true);
+            ShowLevel(level);
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+
+        private void ShowOptions()
+        {
+            RectTransform panel = CreateMenuPanel("Graphics & Sound", 640);
+            showingOptions = true;
+            menuStatus.text = "Settings are saved on this device.";
+            Text graphicsHeading = GameUI.Label("GRAPHICS", panel, 20, GameUI.Mint);
+            GameUI.Size(graphicsHeading.rectTransform, 28);
+            int quality = QualitySettings.GetQualityLevel();
+            Button graphics = null;
+            graphics = GameUI.Button("Graphics: " + QualitySettings.names[quality], panel, () =>
+            {
+                int next = (QualitySettings.GetQualityLevel() + 1) % QualitySettings.names.Length;
+                QualitySettings.SetQualityLevel(next);
+                graphics.GetComponentInChildren<Text>().text = "Graphics: " + QualitySettings.names[next];
+                SaveOption("StreetMatch.Quality", next);
+            });
+#if UNITY_WEBGL && !UNITY_EDITOR
+            GameUI.Size(GameUI.Label("Fullscreen: use your browser's fullscreen controls.", panel).rectTransform, 48);
+#else
+            Button fullscreen = null;
+            fullscreen = GameUI.Button("Fullscreen: " + (Screen.fullScreen ? "On" : "Off"), panel, () =>
+            {
+                bool enabled = PlayerPrefs.GetInt("StreetMatch.Fullscreen", Screen.fullScreen ? 1 : 0) == 0;
+                Screen.fullScreen = enabled;
+                fullscreen.GetComponentInChildren<Text>().text = "Fullscreen: " + (enabled ? "On" : "Off");
+                SaveOption("StreetMatch.Fullscreen", enabled ? 1 : 0);
+            });
+#endif
+            Text soundHeading = GameUI.Label("SOUND", panel, 20, GameUI.Mint);
+            GameUI.Size(soundHeading.rectTransform, 28);
+            Button sound = null;
+            sound = GameUI.Button(muted ? "Sound: Off" : "Sound: On", panel, () =>
+            {
+                ToggleSound();
+                sound.GetComponentInChildren<Text>().text = muted ? "Sound: Off" : "Sound: On";
+            });
+            Text volumeLabel = GameUI.Label("Volume: " + Mathf.RoundToInt(volume * 100) + "%", panel);
+            GameUI.Size(volumeLabel.rectTransform, 32);
+            RectTransform sliderRect = GameUI.Rect("Volume", panel);
+            GameUI.Size(sliderRect, 40);
+            GameUI.Surface(sliderRect, GameUI.Card);
+            Slider slider = sliderRect.gameObject.AddComponent<Slider>();
+            RectTransform handle = GameUI.Rect("Handle", sliderRect);
+            GameUI.Surface(handle, GameUI.Mint);
+            handle.sizeDelta = new Vector2(24, 0);
+            slider.handleRect = handle;
+            slider.targetGraphic = handle.GetComponent<Image>();
+            slider.value = volume;
+            slider.onValueChanged.AddListener(value =>
+            {
+                volume = value;
+                volumeLabel.text = "Volume: " + Mathf.RoundToInt(volume * 100) + "%";
+            });
+            GameUI.Button("Back", panel, ReturnFromOptions, GameUI.Mint, GameUI.Ink);
+        }
+
+        private void ReturnFromOptions()
+        {
+            CloseGameMenu();
+            showingOptions = false;
+            if (studying) ShowGameMenu();
+            else ShowMainMenu();
+        }
+
+        private void SaveOption(string key, int value)
+        {
+            try
+            {
+                PlayerPrefs.SetInt(key, value);
+                PlayerPrefs.Save();
+            }
+            catch (PlayerPrefsException exception)
+            {
+                menuStatus.text = "Settings could not be saved on this device.";
+                Debug.LogWarning(menuStatus.text + " " + exception.Message);
+            }
         }
 
         private void CloseGameMenu()
         {
             if (gameMenu == null) return;
             SavePlayerName();
+            if (showingOptions) SaveVolume();
+            gameMenu.gameObject.SetActive(false);
             Destroy(gameMenu.gameObject);
             gameMenu = null;
+            showingOptions = false;
             nameInput = null;
             menuStatus = null;
         }
@@ -269,6 +414,22 @@ namespace StreetMatch
             if (nameInput != null && nameInput.text != playerName)
                 nameInput.SetTextWithoutNotify(playerName);
             SavePlayerName();
+        }
+
+        private void SaveVolume()
+        {
+            try
+            {
+                PlayerPrefs.SetFloat("StreetMatch.Volume", volume);
+                PlayerPrefs.Save();
+            }
+            catch (PlayerPrefsException exception)
+            {
+                storageWarning = "Volume could not be saved on this device.";
+                Debug.LogWarning(storageWarning + " " + exception.Message);
+                if (menuStatus != null) menuStatus.text = storageWarning;
+                UpdateHeader();
+            }
         }
 
         private void SavePlayerName()
@@ -283,6 +444,7 @@ namespace StreetMatch
             {
                 storageWarning = "Name could not be saved on this device.";
                 Debug.LogWarning(storageWarning + " " + exception.Message);
+                if (menuStatus != null) menuStatus.text = storageWarning;
                 UpdateHeader();
             }
         }
@@ -633,13 +795,6 @@ namespace StreetMatch
                 rect.anchorMax = new Vector2((float)round.Points / round.Count, 1);
                 rect.offsetMin = Vector2.zero;
                 rect.offsetMax = Vector2.zero;
-                var scaler = GetComponentInParent<CanvasScaler>();
-                if (scaler != null && safe.width > 0 && safe.height > 0)
-                {
-                    // Reserve the reference layout inside the usable screen, not behind cutouts.
-                    scaler.referenceResolution = new Vector2(
-                        1440f * size.x / safe.width, 1000f * size.y / safe.height);
-                }
             }
             UpdateHeader();
         }
@@ -694,13 +849,14 @@ namespace StreetMatch
             {
                 storageWarning = "Sound preference could not be saved on this device.";
                 Debug.LogWarning(storageWarning + " " + exception.Message);
+                if (menuStatus != null) menuStatus.text = storageWarning;
                 UpdateHeader();
             }
         }
 
         private void Play(AudioClip clip)
         {
-            if (!muted) audioSource.PlayOneShot(clip, .12f);
+            if (!muted) audioSource.PlayOneShot(clip, .12f * volume);
         }
 
         private static AudioClip Tone(float first, float second)
@@ -726,6 +882,7 @@ namespace StreetMatch
             {
                 Save();
                 SavePlayerName();
+                SaveVolume();
             }
         }
 
@@ -735,6 +892,7 @@ namespace StreetMatch
             {
                 GameSave.Save(progress, out storageWarning);
                 SavePlayerName();
+                SaveVolume();
             }
         }
 
@@ -762,6 +920,13 @@ namespace StreetMatch
             rect.anchorMax = new Vector2(safe.xMax / size.x, safe.yMax / size.y);
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+            var scaler = GetComponentInParent<CanvasScaler>();
+            if (scaler != null && safe.width > 0 && safe.height > 0)
+            {
+                // Reserve the reference layout inside the usable screen, not behind cutouts.
+                scaler.referenceResolution = new Vector2(
+                    1440f * size.x / safe.width, 1000f * size.y / safe.height);
+            }
         }
     }
 }
