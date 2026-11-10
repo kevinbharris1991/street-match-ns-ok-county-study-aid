@@ -25,6 +25,7 @@ namespace StreetMatch
         private RectTransform content;
         private RectTransform ghost;
         private RectTransform gameMenu;
+        private RectTransform splashScreen;
         private InputField nameInput;
         private Text stats;
         private Text feedback;
@@ -66,6 +67,7 @@ namespace StreetMatch
             wrongSound = Tone(190, 220);
             BuildShell();
             ShowLevel(level);
+            ShowSplashScreen();
         }
 
         private void BuildShell()
@@ -147,6 +149,13 @@ namespace StreetMatch
 
         private void Update()
         {
+            if (splashScreen != null)
+            {
+                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) ||
+                    Input.GetKeyDown(KeyCode.Escape))
+                    DismissSplashScreen();
+                return;
+            }
             if (gameMenu != null)
             {
                 if (Input.GetKeyDown(KeyCode.Escape)) CloseGameMenu();
@@ -161,6 +170,41 @@ namespace StreetMatch
                 (nameInput == null || !nameInput.isFocused) &&
                 primary != null && primary.isActiveAndEnabled && primary.interactable)
                 primary.onClick.Invoke();
+        }
+
+        private void ShowSplashScreen()
+        {
+            Texture2D splashTexture = Resources.Load<Texture2D>("StreetMatchSplash");
+            if (splashTexture == null)
+                throw new InvalidOperationException("The Street Match splash artwork is missing from Resources.");
+
+            splashScreen = GameUI.Rect("Splash Screen", canvasRect);
+            GameUI.Stretch(splashScreen);
+            RawImage background = splashScreen.gameObject.AddComponent<RawImage>();
+            background.texture = splashTexture;
+
+            RectTransform startButtonRect = GameUI.Rect("Start Game", splashScreen);
+            GameUI.Stretch(startButtonRect);
+            Image clickSurface = startButtonRect.gameObject.AddComponent<Image>();
+            clickSurface.color = new Color(0, 0, 0, 0);
+            Button startButton = startButtonRect.gameObject.AddComponent<Button>();
+            startButton.targetGraphic = clickSurface;
+            startButton.transition = Selectable.Transition.None;
+            startButton.onClick.AddListener(DismissSplashScreen);
+
+            Text startLabel = GameUI.Label("TAP OR CLICK TO START", startButtonRect, 22,
+                GameUI.Mint, TextAnchor.MiddleCenter);
+            startLabel.rectTransform.anchorMin = startLabel.rectTransform.anchorMax = new Vector2(.5f, 0);
+            startLabel.rectTransform.pivot = new Vector2(.5f, 0);
+            startLabel.rectTransform.anchoredPosition = new Vector2(0, 18);
+            startLabel.rectTransform.sizeDelta = new Vector2(500, 48);
+        }
+
+        private void DismissSplashScreen()
+        {
+            if (splashScreen == null) return;
+            Destroy(splashScreen.gameObject);
+            splashScreen = null;
         }
 
         private void ShowGameMenu()

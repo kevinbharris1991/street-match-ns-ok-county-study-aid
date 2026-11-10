@@ -16,6 +16,9 @@ The scene is intentionally lightweight: its UI, cards, camera, textures, and sou
 are constructed at runtime. Start this scene rather than a new, unnamed scene.
 The first import configures the product title, window size, and legacy input module.
 Use **Active Input Handling: Input Manager (Old)** if you change the input settings.
+The launch screen shows the game title and this disclaimer: "Unofficial study aid,
+not certified EMS training or an operational navigational tool." Press Enter or
+tap/click it to start.
 
 ## How to play
 
@@ -101,6 +104,9 @@ pair IDs stable to preserve the meaning of existing saved progress.
 - `Assets/Editor`: project setup and WebGL build command.
 - `Assets/Tests/Editor`: shared rules regression suite and Unity test entry point.
 - `Tests`: dependency-free .NET runner for the same core regression suite.
+- `Assets/Art/StreetMatchIcon.png`: desktop app icon.
+- `Assets/Resources/StreetMatchSplash.png`: in-game splash screen artwork.
+- `Tools/generate_brand_art.py`: reproducibly generates the icon and splash artwork.
 
 The scene, controller, and code assemblies use `StreetMatch` naming. Legacy
 PlayerPrefs keys and the Unity company identifier remain unchanged only for

@@ -24,6 +24,10 @@ namespace StreetMatch.Editor
             PlayerSettings.resizableWindow = true;
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
             PlayerSettings.WebGL.template = "APPLICATION:Default";
+            Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/StreetMatchIcon.png");
+            if (icon == null)
+                throw new FileNotFoundException("The Street Match app icon is missing.", "Assets/Art/StreetMatchIcon.png");
+            PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Standalone, new[] { icon });
             // This project uses uGUI's legacy input module, including touch support.
             var settings = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset")[0]);
             SerializedProperty input = settings.FindProperty("activeInputHandler");
